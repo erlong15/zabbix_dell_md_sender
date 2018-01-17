@@ -5,7 +5,7 @@ The script is working under pytthon 3.6
 
 # How to run
 ```bash
-pip3.6 install -r requrements.txt
+pip3.6 install -r requirements.txt
 
 python3.6 get_md_devices.py <StorageName>
 ```

@@ -1,2 +1,0 @@
-pandas==0.22.0
-ZabbixSender==0.2.7
