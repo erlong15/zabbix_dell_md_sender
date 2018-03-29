@@ -7,8 +7,9 @@ The script is working under pytthon 3.6
 ```bash
 pip3.6 install -r requirements.txt
 
-python3.6 get_md_devices.py <StorageName>
+python3.6 get_md_devices.py <StorageName> <HostZabbixName> <stat.log>
 ```
+
 
 # Links
 [ Russian description ]( https://otus.ru/nest/post/13/ )
