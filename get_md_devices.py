@@ -1,34 +1,41 @@
-#!/usr/bin/python3.6
+#!/usr/bin/env python3
 import pandas as pd
 import json
 from ZabbixSender import ZabbixPacket, ZabbixSender
 import os
-import sys
+import sys, subprocess
 
-storageName = sys.argv[1]
-zbxName = sys.argv[2]
-mdName = sys.argv[3]
+zabbix_server = ZabbixSender(<zabbix server>, 10051)
+storage_host = sys.argv[1]
+zabbix_host = sys.argv[2]
+file_stat = "/tmp/" + zabbix_host + "-" + storage_host + ".stat"
 
-os.system('SMcli -n {} -S -quick -c "save storageArray performanceStats file=\\"/var/log/{}.stat\\";"'.format(storageName, mdName))
+subprocess.run(['/usr/lib/zabbix/externalscripts/SMcli', storage_host, 
+'-S', '-quick', '-c', 'save storageArray performanceStats file="' + file_stat + '";'], 
+stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
-file_stat = '/var/log/{}.stat'.format(mdName)
 df = pd.read_csv(file_stat, skiprows=3)
 lld_data = {'data': []}
-for dev in df[ ~df['Objects'].str.contains('Expansion Enclosure')]['Objects'][2:].tolist():
-    lld_data['data'].append({'{#MDDEV}': dev})
-
 packet = ZabbixPacket()
-packet.add(zbxName, 'dell.md.devices', json.dumps(lld_data))
-for ind, dev in df[ ~df['Objects'].str.contains('Expansion Enclosure')][2:].iterrows():
-    packet.add(zbxName, 'dell.md.currios[{}]'.format(dev['Objects']), dev['Current IOs/sec'])
-    packet.add(zbxName, 'dell.md.curriol[{}]'.format(dev['Objects']), dev['Current IO Latency'])
-    packet.add(zbxName, 'dell.md.currmbs[{}]'.format(dev['Objects']), dev['Current MBs/sec'])
-    packet.add(zbxName, 'dell.md.writecashhit[{}]'.format(dev['Objects']), dev['Primary Write Cache Hit %'])
-    packet.add(zbxName, 'dell.md.readprc[{}]'.format(dev['Objects']), dev['Read %'])
-    packet.add(zbxName, 'dell.md.readcashhit[{}]'.format(dev['Objects']), dev['Primary Read Cache Hit %'])
-    packet.add(zbxName, 'dell.md.totalio[{}]'.format(dev['Objects']), dev['Total IOs'])
 
+for index, dev in df[ ~df['Objects'].str.contains('Expansion Enclosure')][2:].iterrows():
+    device=dev['Objects']
+    lld_data['data'].append({'{#MDDEV}': device})
 
-result = ZabbixSender().send(packet)
-print(result)
+    map_metrics = {'Current IOs/sec':'dell.md.currios[' + device + ']','Current IO Latency':'dell.md.curriol[' + device + ']',
+    'Current MBs/sec':'dell.md.currmbs[' + device + ']','Primary Write Cache Hit %':'dell.md.writecashhit[' + device + ']',
+    'Read %':'dell.md.readprc[' + device + ']','Primary Read Cache Hit %':'dell.md.readcashhit[' + device + ']',
+    'Total IOs':'dell.md.totalio[' + device + ']'}
 
+    dev=dev=dev.filter([*map_metrics])
+    # Delete empty metrics, value is -
+    dev=dev[dev!='-']
+    dev=dev.rename(map_metrics)
+    for metric,value in dev.items():
+        packet.add(zabbix_host, metric, value)
+
+packet.add(zabbix_host, 'dell.md.devices', json.dumps(lld_data))
+zabbix_server.send(packet)
+os.remove(file_stat)
+# Print zabbix server status
+print(json.dumps(zabbix_server.status, sort_keys=True))
