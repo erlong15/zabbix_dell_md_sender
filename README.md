@@ -7,9 +7,10 @@ The script is working under pytthon 3.6
 ```bash
 pip3.6 install -r requirements.txt
 
-python3.6 get_md_devices.py <StorageName> <HostZabbixName> <stat.log>
+apt-get install openjdk-8-jre
 ```
-
+Place script to /usr/lib/zabbix/externalscripts
+Create storage host and link template
 
 # Links
 [ Russian description ]( https://otus.ru/nest/post/13/ )
