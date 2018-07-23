@@ -10,6 +10,7 @@ pip3.6 install -r requirements.txt
 apt-get install openjdk-8-jre
 ```
 Place script to /usr/lib/zabbix/externalscripts
+
 Create storage host and link template
 
 # Links
