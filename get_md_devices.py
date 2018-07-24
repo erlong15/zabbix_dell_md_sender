@@ -27,7 +27,7 @@ for index, dev in df[ ~df['Objects'].str.contains('Expansion Enclosure')][2:].it
     'Read %':'dell.md.readprc[' + device + ']','Primary Read Cache Hit %':'dell.md.readcashhit[' + device + ']',
     'Total IOs':'dell.md.totalio[' + device + ']'}
 
-    dev=dev=dev.filter([*map_metrics])
+    dev=dev.filter([*map_metrics])
     # Delete empty metrics, value is -
     dev=dev[dev!='-']
     dev=dev.rename(map_metrics)
