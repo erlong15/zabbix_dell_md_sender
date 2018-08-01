@@ -5,7 +5,7 @@ from ZabbixSender import ZabbixPacket, ZabbixSender
 import os
 import sys, subprocess
 
-zabbix_server = ZabbixSender(<zabbix server>, 10051)
+zabbix_server = ZabbixSender("zabbix.example.org", 10051)
 storage_host = sys.argv[1]
 zabbix_host = sys.argv[2]
 file_stat = "/tmp/" + zabbix_host + "-" + storage_host + ".stat"
